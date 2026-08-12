@@ -88,6 +88,17 @@ wide, so `BrandMark.tsx` rebuilds it as vector from measured geometry
 the artwork — identical, but resolution independent and transparent on any
 background.
 
+### Favicons
+
+`src/app/icon.svg` carries the same vector mark and is the primary favicon.
+`npm run assets:favicons` rasterises it into the two formats SVG cannot cover:
+
+- `favicon.ico` — 32px, transparent, for browsers without SVG favicon support
+- `apple-icon.png` — 180px on solid ink, because iOS composites home-screen
+  icons onto black and a transparent mark would lose its yellow lobe
+
+Re-run it after any change to `icon.svg`.
+
 ### The constraint this created
 
 **No product image in the source exceeds 322px wide** (the five production-floor

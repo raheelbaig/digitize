@@ -13,6 +13,7 @@
     "assets:score": "node scripts/score-tiles.mjs .assets/tiles .assets/scores.json",
     "assets:build": "node scripts/build-assets.mjs .assets/tiles .assets/scores.json",
     "assets": "npm run assets:segment && npm run assets:score && npm run assets:build",
+    "assets:favicons": "node scripts/build-favicons.mjs",
     "qa:shoot": "node scripts/shoot.mjs .qa/shots http://localhost:3000/ --w=1440 --frames=16",
     "qa:perf": "node scripts/perf.mjs http://localhost:3000/",
     "qa:a11y": "node scripts/a11y.mjs http://localhost:3000/"
