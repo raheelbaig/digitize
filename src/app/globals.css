@@ -1,26 +1,197 @@
 @import "tailwindcss";
 
+/* =========================================================================
+   DIGITIZE ARE US — design tokens
+   Base palette is deep ink; the logo's CMY primaries appear only as accents.
+   ========================================================================= */
+@theme {
+  /* -- surface ------------------------------------------------------- */
+  --color-ink: #08080c;
+  --color-ink-900: #0c0d14;
+  --color-ink-800: #12131d;
+  --color-ink-700: #1b1c29;
+  --color-ink-600: #262838;
+  --color-midnight: #14133a;
+
+  --color-bone: #f4f2ee;
+  --color-bone-200: #e8e5df;
+  --color-bone-300: #d6d2c9;
+  --color-smoke: #8b8b96;
+  --color-smoke-dim: #5b5b66;
+
+  /* -- accents, sampled from the brand mark --------------------------- */
+  --color-thread-yellow: #f7e70a;
+  --color-thread-magenta: #e5057f;
+  --color-thread-cyan: #109bdb;
+  --color-thread-red: #da0507;
+  --color-thread-green: #1a8d02;
+  --color-thread-indigo: #190569;
+  --color-burgundy: #7a1420;
+
+  /* -- type ----------------------------------------------------------- */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Fluid display sizes: clamp(min, preferred, max) */
+  --text-display-xl: clamp(3.25rem, 12vw, 13rem);
+  --text-display-lg: clamp(2.5rem, 6.6vw, 7rem);
+  --text-display-md: clamp(2rem, 4.9vw, 4.25rem);
+  --text-display-sm: clamp(1.75rem, 3.6vw, 3rem);
+  --text-lede: clamp(1.0625rem, 1.5vw, 1.5rem);
+
+  /* -- motion --------------------------------------------------------- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  --duration-fast: 260ms;
+  --duration-base: 620ms;
+  --duration-slow: 1100ms;
+  --duration-cinematic: 1700ms;
+
+  /* -- layout --------------------------------------------------------- */
+  --spacing-gutter: clamp(1.25rem, 4vw, 4.5rem);
+  --container-shell: 96rem;
+
+  /* -- depth ---------------------------------------------------------- */
+  --shadow-lift: 0 2rem 5rem -1.5rem rgb(0 0 0 / 0.75);
+  --shadow-plate: 0 1.5rem 3.5rem -2rem rgb(0 0 0 / 0.55);
+}
+
+/* z-index scale — kept in one place so stacking stays predictable */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --z-canvas: 0;
+  --z-content: 10;
+  --z-floating-cta: 40;
+  --z-nav: 50;
+  --z-cursor: 80;
+  --z-loader: 90;
+
+  --nav-h: 4.5rem;
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  * {
+    min-width: 0;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Lenis drives scrolling; native smooth scroll would fight it. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--color-thread-magenta);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-thread-cyan);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Mouse clicks should not leave a ring; keyboard focus always must. */
+  :focus:not(:focus-visible) {
+    outline: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .shell {
+    width: 100%;
+    max-width: var(--container-shell);
+    margin-inline: auto;
+    padding-inline: var(--spacing-gutter);
+  }
+
+  /* Editorial display type: tight, optically corrected, never wobbly. */
+  .display {
+    font-weight: 600;
+    line-height: 0.86;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .label-tech {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-smoke);
+  }
+
+  .rule-hair {
+    border-color: color-mix(in srgb, var(--color-bone) 14%, transparent);
+  }
+
+  /* A single stitch: the dashed motif used for section transitions. */
+  .stitch-line {
+    background-image: repeating-linear-gradient(
+      90deg,
+      currentColor 0 0.75rem,
+      transparent 0.75rem 1.375rem
+    );
+  }
+
+  .stitch-line-v {
+    background-image: repeating-linear-gradient(
+      180deg,
+      currentColor 0 0.75rem,
+      transparent 0.75rem 1.375rem
+    );
+  }
+
+  /* Sections that invert to the light "archive" surface. */
+  .surface-bone {
+    background-color: var(--color-bone);
+    color: var(--color-ink);
+  }
+  .surface-bone .label-tech {
+    color: var(--color-smoke-dim);
+  }
+
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* =========================================================================
+   Reduced motion — the site must read perfectly with everything switched off.
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# asset pipeline: derived crops + QA output.
+# .assets/slides holds the 20 page images exported from DRU PATCHES.pdf and is
+# the only input needed to regenerate public/images (see README).
+.assets/tiles
+.assets/scores.json
+.qa
