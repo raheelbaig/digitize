@@ -19,14 +19,16 @@
   --color-smoke: #8b8b96;
   --color-smoke-dim: #5b5b66;
 
-  /* -- accents, sampled from the brand mark --------------------------- */
-  --color-thread-yellow: #f7e70a;
-  --color-thread-magenta: #e5057f;
-  --color-thread-cyan: #109bdb;
-  --color-thread-red: #da0507;
-  --color-thread-green: #1a8d02;
-  --color-thread-indigo: #190569;
-  --color-burgundy: #7a1420;
+  /* -- accents, sampled from the DRU International mark ----------------
+     Two colours carry the whole identity: the globe/U blue and the R green.
+     `blue-lit` is the same hue opened up for use on the near-black surfaces,
+     where the true brand blue sits at only ~3.8:1 against the ground. */
+  --color-brand-blue: #006db7;
+  --color-brand-blue-lit: #1f9ae4;
+  --color-brand-blue-deep: #004a80;
+  --color-brand-green: #00c977;
+  --color-brand-green-lit: #4fe3a2;
+  --color-brand-green-deep: #009159;
 
   /* -- type ----------------------------------------------------------- */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
@@ -102,12 +104,14 @@
   }
 
   ::selection {
-    background: var(--color-thread-magenta);
+    background: var(--color-brand-blue);
     color: #fff;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-thread-cyan);
+    /* green rather than the brand blue: it has to clear 3:1 on both the ink
+       and the bone surface, and the blue only manages it on one */
+    outline: 2px solid var(--color-brand-green);
     outline-offset: 3px;
     border-radius: 2px;
   }

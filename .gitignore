@@ -46,3 +46,7 @@ next-env.d.ts
 .assets/tiles
 .assets/scores.json
 .qa
+
+# native-resolution crops exported for AI upscaling
+.assets/for-upscaling
+

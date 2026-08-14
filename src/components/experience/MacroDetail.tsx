@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useRef } from "react";
@@ -82,7 +82,7 @@ export function MacroDetail() {
             <Reveal delay={0.1}>
               <p className="mt-8 max-w-sm text-lede leading-[1.45] text-bone/62">
                 Quality is visible{" "}
-                <span className="text-thread-yellow">before it is explained.</span>{" "}
+                <span className="text-brand-green">before it is explained.</span>{" "}
                 Stitch density, edge finish, plating depth — the things a buyer
                 notices in the hand.
               </p>

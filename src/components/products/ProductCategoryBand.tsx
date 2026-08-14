@@ -1,9 +1,11 @@
 "use client";
 
-import { ACCENT_VAR, type ProductCategory } from "@/data/products";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import { ACCENT_VAR, categoryHref, type ProductCategory } from "@/data/products";
 import { SplitText } from "@/components/motion/SplitText";
 import { Reveal } from "@/components/motion/Reveal";
-import { ProductPlate } from "./ProductPlate";
+import { PlateGrid } from "./PlateGrid";
 import { cn } from "@/lib/utils/cn";
 
 /** How many plates make a full sheet without turning into a dump. */
@@ -70,22 +72,33 @@ export function ProductCategoryBand({
                   </li>
                 ))}
               </ul>
+
+              <Link
+                href={categoryHref(category.slug)}
+                data-cursor="link"
+                className="group mt-8 inline-flex items-center gap-2.5 border-b border-ink/25 pb-1.5 text-sm font-medium text-ink transition-colors duration-300 hover:border-ink"
+              >
+                All {category.images.length} {category.title.toLowerCase()}
+                <ArrowUpRight
+                  aria-hidden="true"
+                  className="size-4 transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                />
+              </Link>
             </Reveal>
           </div>
         </div>
 
         {/* ---- specimen sheet ---- */}
         <div className={cn("lg:col-span-8", flip && "lg:order-1 lg:col-start-1")}>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {plates.map((id, i) => (
-              <ProductPlate
-                key={id}
-                id={id}
-                alt={`${category.title.replace(/s$/, "")} sample ${i + 1} manufactured by Digitize Are Us`}
-                delay={(i % 3) * 0.05}
-              />
-            ))}
-          </div>
+          <PlateGrid
+            items={plates.map((id, i) => ({
+              id,
+              // No singularising: stripping a trailing "s" turned Patches into
+              // "Patche". The family name reads fine as-is.
+              alt: `${category.title} — sample ${i + 1} manufactured by Digitize Are Us`,
+              caption: category.title,
+            }))}
+          />
         </div>
       </div>
     </article>

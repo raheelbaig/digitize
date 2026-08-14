@@ -1,10 +1,14 @@
-"use client";
+﻿"use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, X } from "lucide-react";
-import { NAV_LINKS, CONTACT } from "@/data/site";
-import { Wordmark } from "@/components/brand/BrandMark";
+import { NAV_LINKS, CONTACT, navHref } from "@/data/site";
+import { PRODUCT_CATEGORIES, categoryHref } from "@/data/products";
+import { BrandMark } from "@/components/brand/BrandMark";
+import { NavMerchMenu } from "@/components/layout/NavMerchMenu";
 import { BEZIER } from "@/lib/animations/easing";
 import { cn } from "@/lib/utils/cn";
 
@@ -17,6 +21,8 @@ export function Navbar() {
   const [compact, setCompact] = useState(false);
   const [open, setOpen] = useState(false);
   const lastY = useRef(0);
+  const pathname = usePathname();
+  const onHome = pathname === "/";
 
   useEffect(() => {
     const onScroll = () => {
@@ -28,6 +34,9 @@ export function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // The sheet closes from the links themselves rather than from a route-change
+  // effect — every entry inside it already calls setOpen(false) on click.
 
   // Close the sheet on Escape, and lock the page behind it.
   useEffect(() => {
@@ -57,26 +66,41 @@ export function Navbar() {
               : "max-w-[var(--container-shell)] border border-transparent",
           )}
         >
-          <a
-            href="#top"
-            aria-label={`${"Digitize Are Us"} — back to top`}
+          <Link
+            href="/"
+            aria-label="Digitize Are Us — home"
             data-cursor="link"
             className="shrink-0"
           >
-            <Wordmark markClassName={compact ? "h-6" : "h-7"} />
-          </a>
+            <BrandMark
+              priority
+              plate
+              className={cn(
+                "transition-[height] duration-700 ease-[var(--ease-out-expo)]",
+                compact ? "h-6" : "h-8",
+              )}
+            />
+          </Link>
 
           <ul className="hidden items-center gap-8 lg:flex">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
-                <a
-                  href={link.href}
-                  data-cursor="link"
-                  className="group relative block py-1 text-sm text-bone/70 transition-colors duration-300 hover:text-bone"
-                >
-                  {link.label}
-                  <span className="absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-thread-yellow transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:scale-x-100" />
-                </a>
+                {link.menu ? (
+                  <NavMerchMenu
+                    href={link.href}
+                    label={link.label}
+                    compact={compact}
+                  />
+                ) : (
+                  <a
+                    href={navHref(link, onHome)}
+                    data-cursor="link"
+                    className="group relative block py-1 text-sm text-bone/70 transition-colors duration-300 hover:text-bone"
+                  >
+                    {link.label}
+                    <span className="absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-brand-green transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:scale-x-100" />
+                  </a>
+                )}
               </li>
             ))}
           </ul>
@@ -114,7 +138,7 @@ export function Navbar() {
           >
             <div className="flex h-full flex-col px-[var(--spacing-gutter)] py-5">
               <div className="flex items-center justify-between">
-                <Wordmark />
+                <BrandMark className="h-8" plate />
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
@@ -125,7 +149,8 @@ export function Navbar() {
                 </button>
               </div>
 
-              <ul className="mt-auto mb-auto flex flex-col gap-2">
+              {/* Touch has no hover, so the families are listed inline. */}
+              <ul className="mt-auto mb-auto flex flex-col gap-1 overflow-y-auto py-4">
                 {NAV_LINKS.map((link, i) => (
                   <motion.li
                     key={link.href}
@@ -137,13 +162,39 @@ export function Navbar() {
                       ease: BEZIER.outExpo,
                     }}
                   >
-                    <a
-                      href={link.href}
-                      onClick={() => setOpen(false)}
-                      className="display block py-2 text-[clamp(2.25rem,11vw,3.5rem)]"
-                    >
-                      {link.label}
-                    </a>
+                    {link.route ? (
+                      <Link
+                        href={link.href}
+                        onClick={() => setOpen(false)}
+                        className="display block py-2 text-[clamp(2rem,9vw,3rem)]"
+                      >
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <a
+                        href={navHref(link, onHome)}
+                        onClick={() => setOpen(false)}
+                        className="display block py-2 text-[clamp(2rem,9vw,3rem)]"
+                      >
+                        {link.label}
+                      </a>
+                    )}
+
+                    {link.menu ? (
+                      <ul className="mt-1 mb-3 grid grid-cols-2 gap-x-4 gap-y-1.5 border-l border-bone/12 pl-4">
+                        {PRODUCT_CATEGORIES.map((category) => (
+                          <li key={category.slug}>
+                            <Link
+                              href={categoryHref(category.slug)}
+                              onClick={() => setOpen(false)}
+                              className="block py-1 text-sm text-bone/65 transition-colors hover:text-bone"
+                            >
+                              {category.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
                   </motion.li>
                 ))}
               </ul>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef } from "react";
 import { gsap } from "@/lib/animations/gsap";
@@ -130,7 +130,7 @@ export function CraftSection() {
           </dl>
 
           <Reveal>
-            <p className="mt-12 max-w-lg border-l-2 border-thread-yellow pl-6 text-lg leading-[1.5] text-bone/80">
+            <p className="mt-12 max-w-lg border-l-2 border-brand-green pl-6 text-lg leading-[1.5] text-bone/80">
               {ABOUT.reach}
             </p>
           </Reveal>

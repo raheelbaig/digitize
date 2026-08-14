@@ -1,100 +1,89 @@
-import { useId } from "react";
+﻿import Image from "next/image";
+import { SITE } from "@/data/site";
+import { BRAND_LOCKUP, BRAND_MONOGRAM } from "@/data/generated/brand";
 import { cn } from "@/lib/utils/cn";
 
 /**
- * The Digitize Are Us mark: three subtractive-primary circles in an
- * equilateral arrangement. Rebuilt as vector from the portfolio artwork —
- * geometry (r = 0.215, centres 0.307 apart) and all seven region colours were
- * sampled from the deck, so it is identical to the original but resolution
- * independent and transparent on any ground.
+ * The DRU International identity, from the client's supplied artwork.
+ *
+ * Two forms, as the logo itself dictates:
+ *
+ * - `BrandLockup` — the full mark including "INTERNATIONAL". Used where there
+ *   is room for it to be read: the loader and the footer.
+ * - `BrandMark` — the DRU monogram alone. "INTERNATIONAL" is set small enough
+ *   that it turns to mush below roughly 64px, so tight spots (the navbar) get
+ *   the monogram instead of an illegible full lockup.
+ *
+ * The source PNG is transparent, so both sit on any surface. The globe's
+ * continents are cut-outs rather than white fill, which means they read as the
+ * page behind them — intended, and why the logo is never placed over imagery.
  */
 
-const R = 30;
-const CY_TOP = 30;
-const CY_BOTTOM = 67.2;
-const CX_LEFT = 30;
-const CX_MID = 51.45;
-const CX_RIGHT = 72.9;
+const LOCKUP = BRAND_LOCKUP;
+const MONOGRAM = BRAND_MONOGRAM;
 
-const C = {
-  yellow: "#f7e70a",
-  magenta: "#e5057f",
-  cyan: "#109bdb",
-  red: "#da0507",
-  green: "#1a8d02",
-  indigo: "#190569",
-  core: "#180205",
-} as const;
+/**
+ * Both marks render small — a nav chip or a footer plate — but their intrinsic
+ * files are several hundred px so they stay crisp on high-DPR screens. Without
+ * `sizes`, Next would build a srcset from the intrinsic width and ship the
+ * full-size asset during the intro.
+ */
+const SIZES = "200px";
+
+type Props = {
+  className?: string;
+  priority?: boolean;
+  /** Pass false when adjacent text already names the brand. */
+  labelled?: boolean;
+  /**
+   * Sit the logo on its intended white ground. The mark's globe is the deep
+   * brand blue, which falls to roughly 3.8:1 against the page's near-black —
+   * legible, but muddy. On dark surfaces the plate keeps the artwork exactly
+   * as drawn instead of recolouring it.
+   */
+  plate?: boolean;
+};
+
+const PLATE = "inline-flex items-center justify-center rounded-md bg-bone px-2 py-1.5";
+
+export function BrandLockup({
+  className,
+  priority = false,
+  labelled = true,
+  plate = false,
+}: Props) {
+  const img = (
+    <Image
+      src={LOCKUP.src}
+      alt={labelled ? `${SITE.name} International` : ""}
+      aria-hidden={labelled ? undefined : true}
+      width={LOCKUP.width}
+      height={LOCKUP.height}
+      priority={priority}
+      sizes={SIZES}
+      className={cn("h-auto w-auto object-contain", className)}
+    />
+  );
+  return plate ? <span className={PLATE}>{img}</span> : img;
+}
 
 export function BrandMark({
   className,
-  title = "Digitize Are Us",
-}: {
-  className?: string;
-  /** Pass null-ish only when an adjacent wordmark already names the brand. */
-  title?: string | false;
-}) {
-  const uid = useId().replace(/:/g, "");
-  const y = `y-${uid}`;
-  const m = `m-${uid}`;
-
-  return (
-    <svg
-      viewBox="0 0 103 97.2"
-      className={cn("block", className)}
-      role={title ? "img" : "presentation"}
-      aria-label={title || undefined}
-      aria-hidden={title ? undefined : true}
-      focusable="false"
-    >
-      {title ? <title>{title}</title> : null}
-      <defs>
-        <clipPath id={y}>
-          <circle cx={CX_MID} cy={CY_TOP} r={R} />
-        </clipPath>
-        <clipPath id={m}>
-          <circle cx={CX_LEFT} cy={CY_BOTTOM} r={R} />
-        </clipPath>
-      </defs>
-
-      {/* base primaries */}
-      <circle cx={CX_MID} cy={CY_TOP} r={R} fill={C.yellow} />
-      <circle cx={CX_LEFT} cy={CY_BOTTOM} r={R} fill={C.magenta} />
-      <circle cx={CX_RIGHT} cy={CY_BOTTOM} r={R} fill={C.cyan} />
-
-      {/* pairwise overlaps */}
-      <g clipPath={`url(#${y})`}>
-        <circle cx={CX_LEFT} cy={CY_BOTTOM} r={R} fill={C.red} />
-        <circle cx={CX_RIGHT} cy={CY_BOTTOM} r={R} fill={C.green} />
-      </g>
-      <g clipPath={`url(#${m})`}>
-        <circle cx={CX_RIGHT} cy={CY_BOTTOM} r={R} fill={C.indigo} />
-      </g>
-
-      {/* all three */}
-      <g clipPath={`url(#${y})`}>
-        <g clipPath={`url(#${m})`}>
-          <circle cx={CX_RIGHT} cy={CY_BOTTOM} r={R} fill={C.core} />
-        </g>
-      </g>
-    </svg>
+  priority = false,
+  labelled = true,
+  plate = false,
+}: Props) {
+  const img = (
+    <Image
+      src={MONOGRAM.src}
+      alt={labelled ? SITE.name : ""}
+      aria-hidden={labelled ? undefined : true}
+      width={MONOGRAM.width}
+      height={MONOGRAM.height}
+      priority={priority}
+      sizes={SIZES}
+      className={cn("h-auto w-auto object-contain", className)}
+    />
   );
-}
-
-/** Mark plus wordmark, set in the site's own type so it works on dark. */
-export function Wordmark({
-  className,
-  markClassName,
-}: {
-  className?: string;
-  markClassName?: string;
-}) {
-  return (
-    <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <BrandMark className={cn("h-7 w-auto", markClassName)} title={false} />
-      <span className="text-[0.8125rem] font-semibold leading-none tracking-[0.16em] uppercase">
-        Digitize<span className="mx-[0.28em] opacity-45">Are</span>Us
-      </span>
-    </span>
-  );
+  return plate ? <span className={PLATE}>{img}</span> : img;
 }

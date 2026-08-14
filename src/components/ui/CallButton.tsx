@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ArrowUpRight, Phone } from "lucide-react";
 import { CONTACT } from "@/data/site";
@@ -31,10 +31,10 @@ export function CallButton({
         className={cn(
           "group inline-flex items-center gap-3 rounded-full px-6 py-3.5 text-sm font-medium",
           "transition-colors duration-300 ease-[var(--ease-out-expo)]",
-          variant === "solid" && "bg-bone text-ink hover:bg-thread-yellow",
+          variant === "solid" && "bg-bone text-ink hover:bg-brand-green",
           variant === "outline" &&
             "border border-bone/25 text-bone hover:border-bone/70 hover:bg-bone hover:text-ink",
-          variant === "bare" && "px-0 py-0 text-bone hover:text-thread-yellow",
+          variant === "bare" && "px-0 py-0 text-bone hover:text-brand-green",
           className,
         )}
       >

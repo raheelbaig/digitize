@@ -1,57 +1,80 @@
 /**
- * Rasterises src/app/icon.svg into the two formats SVG favicons cannot cover:
+ * Builds the icon set from the DRU monogram.
  *
- *   favicon.ico     32px, for browsers without SVG favicon support
- *   apple-icon.png  180px on solid ink — iOS composites home-screen icons onto
- *                   black, so a transparent mark would lose its yellow lobe
+ *   node scripts/build-favicons.mjs
  *
- * Run: node scripts/build-favicons.mjs
+ * Source is public/images/brand/logo-monogram.png (produced by
+ * build-brand.mjs) — the full lockup's "INTERNATIONAL" line is unreadable
+ * below ~64px, so the icons use the monogram.
+ *
+ * The artwork is dark blue and green with transparent counters, which vanishes
+ * on a dark browser chrome. Every icon therefore sits on the brand's white
+ * ground, matching how the logo is designed to be seen.
  */
 import sharp from "sharp";
-import { readFile, writeFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const APP = path.resolve(import.meta.dirname, "..", "src", "app");
-const svg = await readFile(path.join(APP, "icon.svg"));
+const ROOT = path.resolve(import.meta.dirname, "..");
+const APP = path.join(ROOT, "src", "app");
+const SRC = path.join(ROOT, "public", "images", "brand", "logo-monogram.png");
 
-/** Wrap a PNG in a single-entry ICO container. */
-function pngToIco(png, size) {
-  const header = Buffer.alloc(6);
-  header.writeUInt16LE(0, 0); // reserved
-  header.writeUInt16LE(1, 2); // type: icon
-  header.writeUInt16LE(1, 4); // one image
+const GROUND = "#ffffff";
 
-  const entry = Buffer.alloc(16);
-  entry.writeUInt8(size >= 256 ? 0 : size, 0); // width  (0 means 256)
-  entry.writeUInt8(size >= 256 ? 0 : size, 1); // height
-  entry.writeUInt8(0, 2); // palette
-  entry.writeUInt8(0, 3); // reserved
-  entry.writeUInt16LE(1, 4); // colour planes
-  entry.writeUInt16LE(32, 6); // bits per pixel
-  entry.writeUInt32LE(png.length, 8);
-  entry.writeUInt32LE(header.length + entry.length, 12); // offset
+/** Fit the mark on a square white ground with breathing room. */
+async function square(size, inset = 0.86) {
+  const mark = await sharp(SRC)
+    .resize({
+      width: Math.round(size * inset),
+      height: Math.round(size * inset),
+      fit: "inside",
+      withoutEnlargement: false,
+    })
+    .toBuffer();
 
-  return Buffer.concat([header, entry, png]);
+  return sharp({
+    create: { width: size, height: size, channels: 4, background: GROUND },
+  })
+    .composite([{ input: mark, gravity: "centre" }])
+    .png({ compressionLevel: 9 })
+    .toBuffer();
 }
 
-// --- favicon.ico (transparent, 32px) ---
-const ico32 = await sharp(svg, { density: 384 })
-  .resize(32, 32, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-  .png()
-  .toBuffer();
-await writeFile(path.join(APP, "favicon.ico"), pngToIco(ico32, 32));
+/** Wrap PNGs in an ICO container (one directory entry per size). */
+function toIco(entries) {
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0);
+  header.writeUInt16LE(1, 2);
+  header.writeUInt16LE(entries.length, 4);
 
-// --- apple-icon.png (180px, ink ground, mark inset) ---
-const mark = await sharp(svg, { density: 720 })
-  .resize(140, 140, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-  .png()
-  .toBuffer();
+  let offset = 6 + entries.length * 16;
+  const dir = [];
+  for (const { size, png } of entries) {
+    const e = Buffer.alloc(16);
+    e.writeUInt8(size >= 256 ? 0 : size, 0);
+    e.writeUInt8(size >= 256 ? 0 : size, 1);
+    e.writeUInt8(0, 2);
+    e.writeUInt8(0, 3);
+    e.writeUInt16LE(1, 4);
+    e.writeUInt16LE(32, 6);
+    e.writeUInt32LE(png.length, 8);
+    e.writeUInt32LE(offset, 12);
+    dir.push(e);
+    offset += png.length;
+  }
+  return Buffer.concat([header, ...dir, ...entries.map((x) => x.png)]);
+}
 
-await sharp({
-  create: { width: 180, height: 180, channels: 4, background: "#08080c" },
-})
-  .composite([{ input: mark, gravity: "centre" }])
-  .png()
-  .toFile(path.join(APP, "apple-icon.png"));
+// favicon.ico — 16/32/48 so the browser picks the crispest for its chrome
+const ico = await Promise.all(
+  [16, 32, 48].map(async (size) => ({ size, png: await square(size, 0.92) })),
+);
+await writeFile(path.join(APP, "favicon.ico"), toIco(ico));
 
-console.log("wrote favicon.ico (32px) and apple-icon.png (180px)");
+// icon.png — general-purpose raster icon
+await writeFile(path.join(APP, "icon.png"), await square(512, 0.84));
+
+// apple-icon.png — iOS home screen; no transparency, no rounding of our own
+await writeFile(path.join(APP, "apple-icon.png"), await square(180, 0.8));
+
+console.log("wrote favicon.ico (16/32/48), icon.png (512), apple-icon.png (180)");

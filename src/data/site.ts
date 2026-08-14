@@ -24,13 +24,35 @@ export const CONTACT = {
   facebook: { handle: "digitizeareus", url: "https://facebook.com/digitizeareus" },
 } as const;
 
-export const NAV_LINKS = [
+/** Base path for the custom merch section. */
+export const MERCH_BASE = "/custom-merch";
+
+export type NavLink = {
+  readonly label: string;
+  /** Anchors are relative to the homepage; routes are absolute paths. */
+  readonly href: string;
+  /** True when `href` is a real route rather than an on-page anchor. */
+  readonly route?: boolean;
+  /** Opens the category panel on hover and focus. */
+  readonly menu?: boolean;
+};
+
+export const NAV_LINKS: readonly NavLink[] = [
   { label: "Craft", href: "#craft" },
-  { label: "Products", href: "#products" },
+  { label: "Custom Merch", href: MERCH_BASE, route: true, menu: true },
   { label: "Process", href: "#process" },
   { label: "Advantages", href: "#advantages" },
   { label: "Contact", href: "#contact" },
-] as const;
+];
+
+/**
+ * Anchors only resolve on the homepage. Away from it they need the leading
+ * slash so the browser navigates home first, then scrolls.
+ */
+export function navHref(link: NavLink, onHome: boolean): string {
+  if (link.route) return link.href;
+  return onHome ? link.href : `/${link.href}`;
+}
 
 /**
  * Rewritten from the deck's "About Us" panel into editorial fragments.

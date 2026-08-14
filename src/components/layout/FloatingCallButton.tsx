@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
@@ -46,11 +46,11 @@ export function FloatingCallButton() {
           <a
             href={CONTACT.phoneHref}
             data-cursor="call"
-            className="group flex items-center justify-center gap-3 rounded-full border border-bone/15 bg-ink-900/85 px-5 py-3.5 text-sm text-bone shadow-[var(--shadow-lift)] backdrop-blur-xl transition-colors duration-300 hover:border-thread-yellow/60 hover:text-thread-yellow sm:justify-start"
+            className="group flex items-center justify-center gap-3 rounded-full border border-bone/15 bg-ink-900/85 px-5 py-3.5 text-sm text-bone shadow-[var(--shadow-lift)] backdrop-blur-xl transition-colors duration-300 hover:border-brand-green/60 hover:text-brand-green sm:justify-start"
           >
-            <span className="relative grid size-7 place-items-center rounded-full bg-thread-yellow text-ink">
+            <span className="relative grid size-7 place-items-center rounded-full bg-brand-green text-ink">
               <Phone className="size-3.5" aria-hidden="true" />
-              <span className="absolute inset-0 animate-ping rounded-full bg-thread-yellow/40 [animation-duration:2.8s]" />
+              <span className="absolute inset-0 animate-ping rounded-full bg-brand-green/40 [animation-duration:2.8s]" />
             </span>
             <span className="font-medium">Call Digitize Are Us</span>
             <span className="font-mono text-xs opacity-55 transition-opacity group-hover:opacity-90">

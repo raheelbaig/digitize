@@ -1,11 +1,17 @@
+﻿"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
-import { SITE, CONTACT, NAV_LINKS } from "@/data/site";
-import { BrandMark } from "@/components/brand/BrandMark";
+import { SITE, CONTACT, NAV_LINKS, navHref } from "@/data/site";
+import { PRODUCT_CATEGORIES, categoryHref } from "@/data/products";
+import { BrandLockup } from "@/components/brand/BrandMark";
 import { SplitText } from "@/components/motion/SplitText";
 
 /** Closing scene rather than a link dump: the promise, then the ways to reach us. */
 export function Footer() {
   const year = new Date().getFullYear();
+  const onHome = usePathname() === "/";
 
   return (
     <footer className="relative border-t border-bone/10 pt-20 pb-10">
@@ -17,10 +23,10 @@ export function Footer() {
           lineClassName="text-bone"
         />
 
-        <div className="mt-20 grid gap-12 border-t border-bone/10 pt-12 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-20 grid gap-12 border-t border-bone/10 pt-12 sm:grid-cols-2 lg:grid-cols-5">
           <div>
-            <BrandMark className="h-10 w-auto" />
-            <p className="mt-5 max-w-[15rem] text-sm leading-relaxed text-bone/55">
+            <BrandLockup className="h-20" plate />
+            <p className="mt-5 max-w-60 text-sm leading-relaxed text-bone/55">
               {SITE.tagline}. {SITE.positioning} for custom manufacturing.
             </p>
           </div>
@@ -30,13 +36,40 @@ export function Footer() {
             <ul className="mt-5 flex flex-col gap-2.5">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
-                  <a
-                    href={link.href}
+                  {link.route ? (
+                    <Link
+                      href={link.href}
+                      data-cursor="link"
+                      className="text-sm text-bone/65 transition-colors hover:text-bone"
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a
+                      href={navHref(link, onHome)}
+                      data-cursor="link"
+                      className="text-sm text-bone/65 transition-colors hover:text-bone"
+                    >
+                      {link.label}
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <nav aria-label="Custom merch">
+            <p className="label-tech">Custom merch</p>
+            <ul className="mt-5 flex flex-col gap-2.5">
+              {PRODUCT_CATEGORIES.map((category) => (
+                <li key={category.slug}>
+                  <Link
+                    href={categoryHref(category.slug)}
                     data-cursor="link"
                     className="text-sm text-bone/65 transition-colors hover:text-bone"
                   >
-                    {link.label}
-                  </a>
+                    {category.title}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -49,7 +82,7 @@ export function Footer() {
                 <a
                   href={CONTACT.phoneHref}
                   data-cursor="call"
-                  className="font-mono text-bone transition-colors hover:text-thread-yellow"
+                  className="font-mono text-bone transition-colors hover:text-brand-green"
                 >
                   {CONTACT.phone}
                 </a>

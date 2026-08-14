@@ -11,7 +11,7 @@ import {
 import { gsap } from "@/lib/animations/gsap";
 import { EASE } from "@/lib/animations/easing";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { BrandMark } from "@/components/brand/BrandMark";
+import { BrandLockup } from "@/components/brand/BrandMark";
 
 type Phase = "loading" | "revealing" | "done";
 
@@ -93,7 +93,7 @@ export function IntroProvider({ children }: { children: ReactNode }) {
         >
           <div className="relative flex flex-col items-center gap-6">
             <div ref={markRef} style={{ opacity: 0 }}>
-              <BrandMark className="h-12 w-auto" title={false} />
+              <BrandLockup className="h-24 sm:h-28" priority labelled={false} plate />
             </div>
             <span
               ref={stitchRef}

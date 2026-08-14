@@ -1,4 +1,4 @@
-/**
+﻿/**
  * The product universe. Categories and their variants are transcribed from the
  * deck's "Product Contents" slide and the individual category slides.
  *
@@ -6,6 +6,7 @@
  * scripts/build-assets.mjs from the deck's own photography.
  */
 import { IMAGES, type ImageId } from "./generated/images";
+import { MERCH_BASE } from "./site";
 
 export type ProductCategory = {
   readonly slug: string;
@@ -16,8 +17,12 @@ export type ProductCategory = {
   readonly variants: readonly string[];
   readonly heroImage: ImageId;
   readonly images: readonly ImageId[];
-  /** Accent used for this category's moments of colour. */
-  readonly accent: "yellow" | "magenta" | "cyan" | "red" | "green" | "indigo";
+  /**
+   * Accent for this category's moments of colour. The identity carries exactly
+   * two hues, so the catalogue alternates between them rather than inventing a
+   * spectrum the brand does not own.
+   */
+  readonly accent: "blue" | "green";
 };
 
 /** Collects every generated id for a prefix, in manifest order. */
@@ -56,7 +61,7 @@ export const PRODUCT_CATEGORIES: readonly ProductCategory[] = [
     ],
     heroImage: patches[0]!,
     images: patches,
-    accent: "magenta",
+    accent: "blue",
   },
   {
     slug: "keychains",
@@ -80,7 +85,7 @@ export const PRODUCT_CATEGORIES: readonly ProductCategory[] = [
     ],
     heroImage: keychains[0]!,
     images: keychains,
-    accent: "yellow",
+    accent: "green",
   },
   {
     slug: "pvc",
@@ -99,7 +104,7 @@ export const PRODUCT_CATEGORIES: readonly ProductCategory[] = [
     ],
     heroImage: pvc[0]!,
     images: pvc,
-    accent: "cyan",
+    accent: "blue",
   },
   {
     slug: "metal",
@@ -110,7 +115,7 @@ export const PRODUCT_CATEGORIES: readonly ProductCategory[] = [
     variants: ["Lapel Pin", "Medal", "Coin", "Cufflinks", "Tie Clip", "Dog Tag"],
     heroImage: metal[0]!,
     images: metal,
-    accent: "yellow",
+    accent: "green",
   },
   {
     slug: "hats",
@@ -121,7 +126,7 @@ export const PRODUCT_CATEGORIES: readonly ProductCategory[] = [
     variants: ["Trucker Cap", "Baseball Cap", "Snapback Cap", "Bucket Cap", "Beanie Cap"],
     heroImage: hats[0]!,
     images: hats,
-    accent: "red",
+    accent: "green",
   },
   {
     slug: "labels",
@@ -151,7 +156,7 @@ export const PRODUCT_CATEGORIES: readonly ProductCategory[] = [
     ],
     heroImage: lanyards[0]!,
     images: lanyards,
-    accent: "indigo",
+    accent: "blue",
   },
   {
     slug: "other",
@@ -171,17 +176,13 @@ export const PRODUCT_CATEGORIES: readonly ProductCategory[] = [
     ],
     heroImage: other[0]!,
     images: other,
-    accent: "cyan",
+    accent: "blue",
   },
 ];
 
 export const ACCENT_VAR: Record<ProductCategory["accent"], string> = {
-  yellow: "var(--color-thread-yellow)",
-  magenta: "var(--color-thread-magenta)",
-  cyan: "var(--color-thread-cyan)",
-  red: "var(--color-thread-red)",
-  green: "var(--color-thread-green)",
-  indigo: "var(--color-thread-indigo)",
+  blue: "var(--color-brand-blue)",
+  green: "var(--color-brand-green-deep)",
 };
 
 /** Total distinct variants across the catalogue — used as a real, derived stat. */
@@ -192,4 +193,22 @@ export const VARIANT_COUNT = PRODUCT_CATEGORIES.reduce(
 
 export function categoryBySlug(slug: string): ProductCategory | undefined {
   return PRODUCT_CATEGORIES.find((c) => c.slug === slug);
+}
+
+/** Canonical path for a category's own page. */
+export function categoryHref(slug: string): string {
+  return `${MERCH_BASE}/${slug}`;
+}
+
+/** The families either side of `slug`, wrapping at both ends. */
+export function adjacentCategories(slug: string): {
+  prev: ProductCategory;
+  next: ProductCategory;
+} {
+  const i = PRODUCT_CATEGORIES.findIndex((c) => c.slug === slug);
+  const n = PRODUCT_CATEGORIES.length;
+  return {
+    prev: PRODUCT_CATEGORIES[(i - 1 + n) % n]!,
+    next: PRODUCT_CATEGORIES[(i + 1) % n]!,
+  };
 }

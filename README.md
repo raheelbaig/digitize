@@ -44,6 +44,59 @@ npm run qa:a11y     # heading outline, alt text, tab order, landmarks
 `scripts/shoot.mjs` also takes `--w=390|768|1280|1440|1920`, `--frames=N`,
 `--reduced` (emulates `prefers-reduced-motion`) and `--full`.
 
+## Routes
+
+| Route | |
+|---|---|
+| `/` | The full scroll story, including the complete archive of all eight families |
+| `/custom-merch` | Index — one card per family |
+| `/custom-merch/[slug]` | A family's own page: name, constructions, description, its full run of work |
+
+All eight category pages are prerendered via `generateStaticParams`, with
+`dynamicParams = false` so an unknown slug 404s rather than rendering empty.
+Each carries its own metadata, canonical URL, Open Graph image and
+`ProductCollection` structured data. `sitemap.xml` and `robots.txt` are
+generated from the same data.
+
+**The nav's Custom Merch item** links to the index and reveals the eight
+families on hover. It is a disclosure, not an ARIA menu — the contents are
+links rather than commands, so a `menu` role would misreport what Enter does.
+It opens on pointer intent and on keyboard focus, and closes on Escape, on blur
+out of the group, or on selection. Touch devices get the families listed inline
+in the mobile sheet instead, since hover does not exist there.
+
+Anchors like `#craft` only resolve on the homepage, so `navHref()` prefixes them
+with `/` when the visitor is on a category page — otherwise the link would
+silently do nothing.
+
+### The plate viewer
+
+Clicking any plate opens it full screen (`Lightbox.tsx`), with arrow-key and
+button paging through that family, a counter, Escape to close, a focus trap and
+focus returned to the plate you came from.
+
+It opens on **click, never hover** — a viewer that appears because the pointer
+drifted across a thumbnail is hostile, and hover does not exist on touch.
+Hovering keeps its own quieter feedback: the plate lifts and the product eases
+up ~4%.
+
+Two decisions worth knowing:
+
+- **The enlargement is capped** at 1.5x the asset, hard-limited to 760px. A
+  strict 1:1 cap measured badly — the smallest plates are under 300px, so the
+  viewer opened them at grid size and gave the visitor nothing. Stretching a
+  ~300px photograph across a 1440px screen would put the material's weakest
+  quality on the biggest possible canvas. Measured result: 452px from a 328px
+  file against a 322px grid plate.
+- **The image is `unoptimized`.** Next's optimiser was choosing a variant
+  *narrower* than the file we already have, which defeats the whole feature.
+  The plates are 20–40 KB, so serving the original costs nothing.
+
+Locking the page needed three things, not one: Lenis drives scrolling from
+window events, the scrolling element is `<html>` rather than `<body>`, and a
+stopped Lenis still lets the native wheel through. `lenisRef.ts` exposes the
+instance so overlays can stop it.
+
 ## Content is data, not markup
 
 Everything the site claims lives in two files and nowhere else:
@@ -82,22 +135,91 @@ npm run assets      # segment -> score -> build
    drops any crop wider than 600px, because at this deck's density that always
    means several tiles fused across a gutter, dragging caption text with them.
 
-The brand mark is **not** an extracted bitmap. The deck's logo is only 198px
-wide, so `BrandMark.tsx` rebuilds it as vector from measured geometry
-(r = 0.215, centres 0.307 apart) with all seven CMY region colours sampled from
-the artwork — identical, but resolution independent and transparent on any
-background.
+## Brand
+
+The identity is **DRU International** — a globe-D, a green R and a blue U, with
+the wordmark and "INTERNATIONAL" built into the lockup. Source artwork lives at
+`.assets/brand/dru-logo.png`.
+
+```bash
+npm run assets:brand      # lockup + monogram + generated/brand.ts
+npm run assets:favicons   # favicon.ico, icon.png, apple-icon.png
+```
+
+`build-brand.mjs` trims the artwork to its ink, emits two forms, samples the
+colours and writes `src/data/generated/brand.ts` so the components can never
+drift from the files on disk.
+
+- **`BrandLockup`** — the full mark. Used at the loader and in the footer,
+  where "INTERNATIONAL" is large enough to read.
+- **`BrandMark`** — the DRU monogram alone. Below roughly 64px the
+  "INTERNATIONAL" line turns to mush, so tight spots (navbar, icons) get this.
+
+Both are quantised palette PNGs: the artwork is flat colour, so a palette cuts
+the lockup from 127 KB to 27 KB with no visible loss — and these load during
+the intro, where weight is felt directly.
+
+### Colours, and the white plate
+
+Two colours carry the whole identity, sampled from the artwork rather than
+eyeballed:
+
+| Token | Value | |
+|---|---|---|
+| `--color-brand-blue` | `#006db7` | globe and U |
+| `--color-brand-green` | `#00c977` | R and wordmark |
+
+`--color-brand-blue-lit` / `-deep` and the green equivalents are tonal
+variants for the two surfaces. The catalogue alternates blue and green per
+family instead of inventing a spectrum the brand does not own.
+
+The logo is drawn for a white ground, and the brand blue sits at only ~3.8:1
+against the page's near-black. Rather than recolour the artwork, dark surfaces
+place it on a white plate (`<BrandMark plate />`) — the same reason every
+favicon size sits on white.
 
 ### Favicons
 
-`src/app/icon.svg` carries the same vector mark and is the primary favicon.
-`npm run assets:favicons` rasterises it into the two formats SVG cannot cover:
+Generated from the monogram, all on the brand's white ground:
 
-- `favicon.ico` — 32px, transparent, for browsers without SVG favicon support
-- `apple-icon.png` — 180px on solid ink, because iOS composites home-screen
-  icons onto black and a transparent mark would lose its yellow lobe
+- `favicon.ico` — 16/32/48 in one container, so the browser picks the crispest
+- `icon.png` — 512px general-purpose raster
+- `apple-icon.png` — 180px for iOS home screens
 
-Re-run it after any change to `icon.svg`.
+### The resolution ceiling
+
+`npm run audit:pdf` enumerates every image object in the PDF. The result:
+
+```
+/Subtype /Image occurrences: 20
+all image XObjects: 20 x  1920x1080  8bpc  /DCTDecode
+image XObjects inside object streams: 0
+largest image in the file: 1920x1080 (2.07 MP)
+```
+
+**Twenty images, one per page, every one 1920×1080.** The deck was exported with
+each slide flattened to a single raster, so the original product photographs are
+not in the file at any size — a product occupying a ninth of a slide leaves
+roughly 300px of real detail, and no extraction technique can recover more than
+was captured.
+
+What the pipeline does about it, short of new photography:
+
+- publishes at **2× with a Lanczos resample and mild unsharp masking**. Next's
+  optimiser never upscales past the source, so a 300px file shown at 300 CSS px
+  on a 2× screen was being stretched by the browser's cheap bilinear filter;
+  handing sharp that job instead is visibly cleaner on retina
+- a light `median(1)` first, so JPEG blocking in the source is not magnified
+- WebP quality 94, and **no crop tighter than the artwork requires**
+- `innerBox()` finds and removes the deck's card stroke by detecting the drawn
+  line, rather than trimming a flat percentage that ate into products
+
+Delivered weight is unchanged (365 KB of imagery) because `sizes` still governs
+which variant ships; the larger sources only make a sharp 2× variant possible.
+
+**Real high-resolution product photography remains the single highest-impact
+upgrade to this site**, and needs no code changes — drop files with the same ids
+into `public/images/**` or re-run the manifest step.
 
 ### The constraint this created
 
@@ -160,3 +282,10 @@ than the intro.
   `https://www.digitizeareus.com`.
 - Add a dedicated Open Graph image; it currently reuses a product photo, which
   is only 320px wide.
+- **A reversed logo would remove the white plates.** If the brand kit has a
+  knockout (single-colour or light-blue) version for dark backgrounds, dropping
+  it in and removing `plate` from the navbar, footer and loader would let the
+  mark sit directly on the ink.
+- The lockup is raster. Vector source (SVG/AI/EPS) would sharpen it at every
+  size and shrink it further; `build-brand.mjs` would need only its input
+  changed.

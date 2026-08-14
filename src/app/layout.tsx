@@ -7,6 +7,7 @@ import { IntroProvider } from "@/components/providers/Intro";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { Cursor } from "@/components/motion/Cursor";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { FloatingCallButton } from "@/components/layout/FloatingCallButton";
 
 const geistSans = Geist({
@@ -109,6 +110,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Cursor />
             <Navbar />
             <main id="main">{children}</main>
+            <Footer />
             <FloatingCallButton />
           </SmoothScroll>
         </IntroProvider>

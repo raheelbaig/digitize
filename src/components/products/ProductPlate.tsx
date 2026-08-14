@@ -20,11 +20,14 @@ export function ProductPlate({
   alt,
   className,
   delay = 0,
+  onOpen,
 }: {
   id: ImageId;
   alt: string;
   className?: string;
   delay?: number;
+  /** When given, the plate becomes a button that opens the viewer. */
+  onOpen?: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
@@ -57,25 +60,42 @@ export function ProductPlate({
     return () => ctx.revert();
   }, [reduced, delay]);
 
+  const picture = (
+    <Image
+      src={asset.src}
+      alt={onOpen ? "" : alt}
+      fill
+      sizes="(min-width: 1280px) 22vw, (min-width: 640px) 30vw, 45vw"
+      quality={90}
+      className="object-contain p-3 transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.04]"
+    />
+  );
+
+  const frame = cn(
+    "group relative block aspect-4/3 w-full overflow-hidden rounded-[2px] border border-ink/10 bg-white",
+    "transition-shadow duration-500 ease-[var(--ease-out-expo)] hover:shadow-(--shadow-plate)",
+    className,
+  );
+
   return (
-    <figure
-      ref={ref}
-      data-cursor="view"
-      style={{ opacity: 0 }}
-      className={cn(
-        "group relative aspect-4/3 overflow-hidden rounded-[2px] border border-ink/10 bg-white",
-        "transition-shadow duration-500 ease-[var(--ease-out-expo)] hover:shadow-(--shadow-plate)",
-        className,
+    <div ref={ref} style={{ opacity: 0 }}>
+      {onOpen ? (
+        // The button carries the description, so the image inside is decorative
+        // — otherwise the name is announced twice.
+        <button
+          type="button"
+          onClick={onOpen}
+          data-cursor="view"
+          aria-label={`View larger: ${alt}`}
+          className={cn(frame, "cursor-pointer")}
+        >
+          {picture}
+        </button>
+      ) : (
+        <figure data-cursor="view" className={frame}>
+          {picture}
+        </figure>
       )}
-    >
-      <Image
-        src={asset.src}
-        alt={alt}
-        fill
-        sizes="(min-width: 1280px) 22vw, (min-width: 640px) 30vw, 45vw"
-        quality={90}
-        className="object-contain p-3 transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.04]"
-      />
-    </figure>
+    </div>
   );
 }

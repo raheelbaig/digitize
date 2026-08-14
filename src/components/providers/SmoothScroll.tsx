@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
 import { gsap, ScrollTrigger } from "@/lib/animations/gsap";
+import { setLenis } from "@/lib/animations/lenisRef";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /**
@@ -29,6 +30,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     });
 
     lenis.on("scroll", ScrollTrigger.update);
+    setLenis(lenis);
 
     // Handle for the screenshot harness to drive scroll deterministically.
     if (process.env.NODE_ENV !== "production") {
@@ -55,6 +57,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     return () => {
       document.removeEventListener("click", onClick);
       gsap.ticker.remove(tick);
+      setLenis(null);
       lenis.destroy();
     };
   }, [reduced]);

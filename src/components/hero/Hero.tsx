@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useRef } from "react";
@@ -152,7 +152,7 @@ export function Hero() {
                       {i === 1 ? (
                         <>
                           to{" "}
-                          <span className="italic text-thread-yellow">identity.</span>
+                          <span className="italic text-brand-green">identity.</span>
                         </>
                       ) : (
                         line
@@ -192,7 +192,7 @@ export function Hero() {
               >
                 See the product universe
                 <span className="relative block h-px w-8 overflow-hidden bg-bone/30">
-                  <span className="absolute inset-0 origin-left scale-x-0 bg-thread-yellow transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:scale-x-100" />
+                  <span className="absolute inset-0 origin-left scale-x-0 bg-brand-green transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:scale-x-100" />
                 </span>
               </a>
             </div>

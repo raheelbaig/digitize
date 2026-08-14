@@ -7,7 +7,6 @@ import { MacroDetail } from "@/components/experience/MacroDetail";
 import { Benefits } from "@/components/experience/Benefits";
 import { B2BPositioning } from "@/components/experience/B2BPositioning";
 import { FinalCTA } from "@/components/experience/FinalCTA";
-import { Footer } from "@/components/layout/Footer";
 import { StitchDivider } from "@/components/ui/StitchDivider";
 
 /**
@@ -28,7 +27,6 @@ export default function Home() {
       <Benefits />
       <B2BPositioning />
       <FinalCTA />
-      <Footer />
     </>
   );
 }

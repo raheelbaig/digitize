@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useRef } from "react";
@@ -173,7 +173,7 @@ function ProcessPanel({
 
         <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
           <div className="flex items-baseline gap-4">
-            <span className="font-mono text-sm text-thread-yellow">{step.n}</span>
+            <span className="font-mono text-sm text-brand-green">{step.n}</span>
             <span className="stitch-line h-px flex-1 text-bone/35" aria-hidden="true" />
           </div>
           <h3 className="display mt-4 text-3xl sm:text-4xl">{step.title}</h3>
@@ -190,7 +190,7 @@ function ClosingPanel() {
     <div className="flex h-[82svh] w-[clamp(20rem,34vw,32rem)] shrink-0 flex-col justify-center">
       <p className="display text-display-sm">
         Then it ships —<br />
-        <span className="text-thread-yellow">on your deadline.</span>
+        <span className="text-brand-green">on your deadline.</span>
       </p>
       <p className="mt-6 max-w-xs text-bone/60">
         Standard orders are ready to ship in 8–10 days, with rush production when

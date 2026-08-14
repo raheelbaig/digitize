@@ -28,7 +28,7 @@ export function B2BPositioning() {
               <span className="display px-6 text-[clamp(2.5rem,7vw,6rem)] text-ink/85">
                 {word}
               </span>
-              <span aria-hidden="true" className="size-2 rounded-full bg-thread-magenta" />
+              <span aria-hidden="true" className="size-2 rounded-full bg-brand-green-deep" />
             </span>
           ))}
         </Marquee>
@@ -39,7 +39,7 @@ export function B2BPositioning() {
               <span className="display px-6 text-[clamp(2.5rem,7vw,6rem)] text-ink/18">
                 {word}
               </span>
-              <span aria-hidden="true" className="size-2 rounded-full bg-thread-cyan" />
+              <span aria-hidden="true" className="size-2 rounded-full bg-brand-blue" />
             </span>
           ))}
         </Marquee>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useRef } from "react";
@@ -113,7 +113,7 @@ export function FinalCTA() {
             <a
               href={CONTACT.phoneHref}
               data-cursor="call"
-              className="display block text-[clamp(1.75rem,5.4vw,4.5rem)] tracking-[-0.03em] transition-colors duration-500 hover:text-thread-yellow"
+              className="display block text-[clamp(1.75rem,5.4vw,4.5rem)] tracking-[-0.03em] transition-colors duration-500 hover:text-brand-green"
             >
               {CONTACT.phone}
             </a>
