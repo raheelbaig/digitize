@@ -18,7 +18,8 @@
     "assets:favicons": "node scripts/build-favicons.mjs",
     "qa:shoot": "node scripts/shoot.mjs .qa/shots http://localhost:3000/ --w=1440 --frames=16",
     "qa:perf": "node scripts/perf.mjs http://localhost:3000/",
-    "qa:a11y": "node scripts/a11y.mjs http://localhost:3000/"
+    "qa:a11y": "node scripts/a11y.mjs http://localhost:3000/",
+    "reviews:refresh": "node scripts/refresh-reviews.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

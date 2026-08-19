@@ -25,7 +25,7 @@ export function Footer() {
 
         <div className="mt-20 grid gap-12 border-t border-bone/10 pt-12 sm:grid-cols-2 lg:grid-cols-5">
           <div>
-            <BrandLockup className="h-20" plate />
+            <BrandLockup className="h-24" />
             <p className="mt-5 max-w-60 text-sm leading-relaxed text-bone/55">
               {SITE.tagline}. {SITE.positioning} for custom manufacturing.
             </p>

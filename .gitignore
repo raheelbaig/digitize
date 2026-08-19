@@ -50,3 +50,6 @@ next-env.d.ts
 # native-resolution crops exported for AI upscaling
 .assets/for-upscaling
 
+
+# ...but the template is documentation and should be committed
+!.env.example

@@ -74,10 +74,9 @@ export function Navbar() {
           >
             <BrandMark
               priority
-              plate
               className={cn(
                 "transition-[height] duration-700 ease-[var(--ease-out-expo)]",
-                compact ? "h-6" : "h-8",
+                compact ? "h-9" : "h-12",
               )}
             />
           </Link>
@@ -138,7 +137,7 @@ export function Navbar() {
           >
             <div className="flex h-full flex-col px-[var(--spacing-gutter)] py-5">
               <div className="flex items-center justify-between">
-                <BrandMark className="h-8" plate />
+                <BrandMark className="h-12" />
                 <button
                   type="button"
                   onClick={() => setOpen(false)}

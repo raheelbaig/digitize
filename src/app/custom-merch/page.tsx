@@ -70,14 +70,20 @@ export default function CustomMerchPage() {
                       data-cursor="view"
                       className="group flex h-full flex-col rounded-2xl border border-ink/12 bg-white p-3 transition-shadow duration-500 ease-[var(--ease-out-expo)] hover:shadow-(--shadow-plate)"
                     >
-                      <span className="relative block aspect-4/3 overflow-hidden rounded-xl bg-white">
+                      <span
+                        className={`relative block aspect-4/3 overflow-hidden rounded-xl ${
+                          asset.fit === "contain" ? "plate-ground" : "bg-ink-800"
+                        }`}
+                      >
                         <Image
                           src={asset.src}
                           alt=""
                           fill
                           sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
-                          quality={90}
-                          className="object-contain p-3 transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.04]"
+                          quality={asset.fit === "contain" ? 90 : 82}
+                          className={`transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.04] ${
+                            asset.fit === "contain" ? "object-contain p-3" : "object-cover"
+                          }`}
                         />
                       </span>
 

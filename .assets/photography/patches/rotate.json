@@ -1,0 +1,5 @@
+{
+  "_comment": "filename -> degrees clockwise. Only for photographs that were TAKEN upside down or sideways. The pipeline already applies EXIF orientation; these files carry none. A pile of loose patches genuinely sits at mixed angles, so only correct a frame where every piece reads the same wrong way. Re-run: npm run assets:build",
+  "WhatsApp Image 2026-08-15 at 2.48.25 AM (3).jpeg": 180,
+  "WhatsApp Image 2026-08-15 at 2.48.25 AM (9).jpeg": 180
+}

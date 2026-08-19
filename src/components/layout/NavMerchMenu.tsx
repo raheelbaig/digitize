@@ -136,14 +136,23 @@ export function NavMerchMenu({
                         data-cursor="link"
                         className="group flex items-center gap-3 rounded-xl p-2 transition-colors duration-300 hover:bg-bone/6"
                       >
-                        <span className="relative size-11 shrink-0 overflow-hidden rounded-lg border border-ink/10 bg-white">
+                        <span
+                          className={cn(
+                            "relative size-11 shrink-0 overflow-hidden rounded-lg border",
+                            asset.fit === "contain"
+                              ? "plate-ground border-ink/10"
+                              : "border-bone/15 bg-ink-800",
+                          )}
+                        >
                           <Image
                             src={asset.src}
                             alt=""
                             fill
                             sizes="44px"
                             quality={80}
-                            className="object-contain p-1"
+                            className={
+                              asset.fit === "contain" ? "object-contain p-1" : "object-cover"
+                            }
                           />
                         </span>
                         <span className="min-w-0">

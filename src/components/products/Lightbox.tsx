@@ -23,11 +23,14 @@ export type PlateItem = {
  * A strict 1:1 cap sounded right but measured badly: the smallest plates are
  * under 300px, so the viewer opened them at the same size as the grid and gave
  * the visitor nothing. 1.5x is enough to feel like an enlargement while staying
- * inside what the Lanczos-sharpened sources tolerate, and 760px stops a ~300px
- * photograph from ever being stretched across a 1440px screen.
+ * inside what the Lanczos-sharpened deck crops tolerate.
+ *
+ * The 1200px ceiling is what real photography earns: a 1400px source lands
+ * there as a genuine downscale, while a 328px deck crop is still held to
+ * 492px. One rule, and it scales itself as better material arrives.
  */
 const MAX_SCALE = 1.5;
-const MAX_WIDTH = 760;
+const MAX_WIDTH = 1200;
 
 function displayWidth(intrinsic: number): number {
   return Math.min(Math.round(intrinsic * MAX_SCALE), MAX_WIDTH);
@@ -202,7 +205,14 @@ export function Lightbox({
               className="flex min-h-0 min-w-0 flex-col items-center"
             >
               <div
-                className="overflow-hidden rounded-2xl bg-white p-3 shadow-[var(--shadow-lift)] sm:p-5"
+                className={
+                  // A cut-out needs the white mount around it; a photograph
+                  // already fills its own frame and a white border just
+                  // looks like a mistake.
+                  asset.fit === "contain"
+                    ? "plate-ground overflow-hidden rounded-2xl p-3 shadow-(--shadow-lift) sm:p-5"
+                    : "overflow-hidden rounded-2xl shadow-(--shadow-lift)"
+                }
                 // an explicit width is required: as a centred flex item this
                 // box would otherwise shrink to the image's intrinsic size and
                 // the cap would never apply

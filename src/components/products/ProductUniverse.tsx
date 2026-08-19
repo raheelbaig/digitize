@@ -58,7 +58,11 @@ export function ProductUniverse() {
           return (
             <span
               key={id}
-              className="relative block aspect-4/3 h-[clamp(6.5rem,11vw,9.5rem)] shrink-0 overflow-hidden rounded-[2px] border border-ink/10 bg-white"
+              className={`relative block aspect-4/3 h-[clamp(6.5rem,11vw,9.5rem)] shrink-0 overflow-hidden rounded-md border ${
+                asset.fit === "contain"
+                  ? "plate-ground border-ink/8"
+                  : "border-ink/12 bg-ink-800"
+              }`}
             >
               <Image
                 src={asset.src}
@@ -66,7 +70,7 @@ export function ProductUniverse() {
                 fill
                 sizes="16vw"
                 quality={82}
-                className="object-contain p-2.5"
+                className={asset.fit === "contain" ? "object-contain p-2.5" : "object-cover"}
               />
             </span>
           );

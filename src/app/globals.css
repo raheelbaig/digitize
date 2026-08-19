@@ -58,6 +58,13 @@
   /* -- depth ---------------------------------------------------------- */
   --shadow-lift: 0 2rem 5rem -1.5rem rgb(0 0 0 / 0.75);
   --shadow-plate: 0 1.5rem 3.5rem -2rem rgb(0 0 0 / 0.55);
+
+  /* -- product plate ---------------------------------------------------
+     The soft grey ground cut-out products sit on. A flat white card leaves
+     a cut-out looking like it is floating in nothing; a light gradient gives
+     it a surface to sit on and reads as a studio sweep. */
+  --gradient-plate: linear-gradient(157deg, #f1f1f3 0%, #e6e6ea 52%, #dadade 100%);
+  --gradient-plate-hover: linear-gradient(157deg, #f5f5f7 0%, #eaeaee 52%, #dedee3 100%);
 }
 
 /* z-index scale — kept in one place so stacking stays predictable */
@@ -168,6 +175,14 @@
   }
 
   /* Sections that invert to the light "archive" surface. */
+  /* The studio-sweep card a cut-out product sits on. */
+  .plate-ground {
+    background-image: var(--gradient-plate);
+  }
+  .plate-ground-hover:hover {
+    background-image: var(--gradient-plate-hover);
+  }
+
   .surface-bone {
     background-color: var(--color-bone);
     color: var(--color-ink);

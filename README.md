@@ -82,12 +82,12 @@ up ~4%.
 
 Two decisions worth knowing:
 
-- **The enlargement is capped** at 1.5x the asset, hard-limited to 760px. A
-  strict 1:1 cap measured badly — the smallest plates are under 300px, so the
-  viewer opened them at grid size and gave the visitor nothing. Stretching a
-  ~300px photograph across a 1440px screen would put the material's weakest
-  quality on the biggest possible canvas. Measured result: 452px from a 328px
-  file against a 322px grid plate.
+- **The enlargement is capped** at 1.5x the asset, hard-limited to 1200px. A
+  strict 1:1 cap measured badly — the smallest deck crops are under 300px, so
+  the viewer opened them at grid size and gave the visitor nothing. The ceiling
+  is what real material earns: a 1400px photograph lands at 1200px as a genuine
+  *downscale*, while a 328px deck crop is still held to 492px. One rule, and it
+  scales itself as better photography arrives.
 - **The image is `unoptimized`.** Next's optimiser was choosing a variant
   *narrower* than the file we already have, which defeats the whole feature.
   The plates are 20–40 KB, so serving the original costs nothing.
@@ -96,6 +96,52 @@ Locking the page needed three things, not one: Lenis drives scrolling from
 window events, the scrolling element is `<html>` rather than `<body>`, and a
 stopped Lenis still lets the native wheel through. `lenisRef.ts` exposes the
 instance so overlays can stop it.
+
+## Google reviews
+
+`Reviews.tsx` renders the Google rating and latest reviews above the final CTA.
+
+**The site never calls the Places API.** Not at runtime, not per visitor, not on
+build. `npm run reviews:refresh` calls Google exactly once and writes
+`src/data/generated/reviews.ts`; the page only reads that file. Reviewer avatars
+are downloaded during the refresh too, so every image the site serves is local
+and no request leaves the page at view time.
+
+That is deliberate: reviews on a marketing page change every few months, so
+paying per revalidation window bought nothing, and a snapshot removes any
+chance of a surprise bill or of a Google outage affecting the page. The
+homepage also stays fully static.
+
+```bash
+cp .env.example .env.local     # fill in both values
+npm run reviews:refresh        # one API call, writes the snapshot
+```
+
+| Variable | |
+|---|---|
+| `GOOGLE_PLACES_API_KEY` | Places API **(New)**, billing enabled, key restricted to that API |
+| `GOOGLE_PLACE_ID` | The `ChIJ…` Place ID, from Google's Place ID Finder |
+
+The key is only ever read by the refresh script, so it is not needed in the
+hosting environment — deploys use the committed snapshot.
+
+`refresh-reviews.mjs` names the specific fix for each failure it can hit:
+`API_KEY_SERVICE_BLOCKED` means the key's API restrictions omit Places API
+(New); `SERVICE_DISABLED` means the API is not enabled on the project;
+`API_KEY_HTTP_REFERRER_BLOCKED` means the key has a referrer restriction, which
+cannot work for a server-side call.
+
+Google's display terms are honoured: review text is shown **verbatim**, each
+carries its author's name and photo linking to their profile, the relative
+publish time is kept, the Google mark appears on every card, and the aggregate
+links back to the listing. Their policy expects cached content to be refreshed
+rather than kept indefinitely, so re-run the command occasionally — monthly is
+ample, and twelve calls a year sits far inside the free allowance.
+
+With no snapshot the section renders nothing and the site builds and deploys
+normally. `REVIEWS_MOCK=1` in `.env.local` renders clearly-labelled "SAMPLE
+TEXT" placeholders for previewing the layout; it is fenced to non-production so
+it cannot appear on a live site.
 
 ## Content is data, not markup
 
@@ -159,6 +205,15 @@ Both are quantised palette PNGs: the artwork is flat colour, so a palette cuts
 the lockup from 127 KB to 27 KB with no visible loss — and these load during
 the intro, where weight is felt directly.
 
+### The plate
+
+Cut-outs sit on `--gradient-plate`, a soft light-grey sweep, rather than flat
+white. A cut-out on white has nothing to sit on and reads as a floating
+screenshot; a gradient gives it a surface and reads as a studio backdrop. The
+`.plate-ground` utility carries it, and every surface that shows a cut-out —
+grid, nav thumbnails, index cards, the viewer — uses it, so the treatment is
+changed in one place.
+
 ### Colours, and the white plate
 
 Two colours carry the whole identity, sampled from the artwork rather than
@@ -185,6 +240,56 @@ Generated from the monogram, all on the brand's white ground:
 - `favicon.ico` — 16/32/48 in one container, so the browser picks the crispest
 - `icon.png` — 512px general-purpose raster
 - `apple-icon.png` — 180px for iOS home screens
+
+### Supplying real photography
+
+**This is the fix for everything below.** Drop images into
+`.assets/photography/<category>/` and that folder replaces the deck crops for
+the whole family:
+
+```
+.assets/photography/patches/*.jpeg     ->  patches-01 .. patches-27
+npm run assets:build
+```
+
+Those files skip every repair step — no de-bordering, no upscaling, no
+artefact smoothing — because they need none. They are oriented, resized to
+1400px and encoded, nothing more. Ids stay `<category>-NN` in natural filename
+order, so every existing reference keeps working.
+
+Two things the pipeline handles that are easy to miss:
+
+- **Frame fit is detected, not configured.** `detectFit()` samples the border of
+  each finished image: a studio cut-out is surrounded by paper and gets
+  `contain` on a white card, a photograph has its own background and gets
+  `cover` edge to edge. The manifest carries `fit`, and every surface — grid,
+  nav thumbnails, index cards, viewer — reads it. Mixing cut-outs and
+  photographs across categories therefore just works.
+- **`contain` is earned, not guessed.** An image is only presented as a
+  cut-out once its backdrop has actually been removed; everything else covers
+  its frame. That ordering is what makes a leftover white box on the grey
+  plate *impossible* rather than merely unlikely — the border test only
+  decides whether the attempt is worth making, and the attempt decides the
+  outcome. 106 of 157 images qualify; the rest are photographs and cover.
+- **Studio paper is knocked out of cut-outs.** A product photographed on white
+  arrives as a white rectangle, and a white rectangle sitting on the page's
+  grey plate looks like a bug. `knockoutPaper()` floods inward from the border
+  and only spreads through paper, so whites *enclosed* by the product — a white
+  cap panel, the body of a label — survive; knocking out every white pixel
+  would punch holes through half the catalogue. It refuses the result if
+  nothing was removed or if more than 93% was, which is the signature of a pale
+  product the fill leaked into. 94 of 157 images qualify; the rest are
+  photographs and are left to cover their frame.
+- **Next's image cache is cleared on every build.** Optimised images are keyed
+  by request URL, and replacing a file leaves its URL unchanged, so the site
+  would otherwise keep serving the previous artwork from
+  `.next/cache/images` while the new file sat on disk — which looks exactly
+  like the build having silently failed.
+
+If a photograph was taken upside down it carries no EXIF to correct, so put a
+`rotate.json` beside the images mapping filename to degrees. Do this sparingly:
+a tray of loose patches genuinely sits at mixed angles, so "the text is upside
+down" is not evidence that the photograph is.
 
 ### The resolution ceiling
 

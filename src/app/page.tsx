@@ -6,6 +6,7 @@ import { ProcessStory } from "@/components/story/ProcessStory";
 import { MacroDetail } from "@/components/experience/MacroDetail";
 import { Benefits } from "@/components/experience/Benefits";
 import { B2BPositioning } from "@/components/experience/B2BPositioning";
+import { Reviews } from "@/components/experience/Reviews";
 import { FinalCTA } from "@/components/experience/FinalCTA";
 import { StitchDivider } from "@/components/ui/StitchDivider";
 
@@ -26,6 +27,7 @@ export default function Home() {
       <MacroDetail />
       <Benefits />
       <B2BPositioning />
+      <Reviews />
       <FinalCTA />
     </>
   );

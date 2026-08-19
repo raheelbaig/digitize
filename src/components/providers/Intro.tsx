@@ -93,7 +93,7 @@ export function IntroProvider({ children }: { children: ReactNode }) {
         >
           <div className="relative flex flex-col items-center gap-6">
             <div ref={markRef} style={{ opacity: 0 }}>
-              <BrandLockup className="h-24 sm:h-28" priority labelled={false} plate />
+              <BrandLockup className="h-28 sm:h-36" priority labelled={false} />
             </div>
             <span
               ref={stitchRef}
