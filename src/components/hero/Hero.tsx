@@ -10,8 +10,10 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useIntroReady } from "@/components/providers/Intro";
 import { IMAGES } from "@/data/generated/images";
 import { PRODUCT_CATEGORIES, VARIANT_COUNT } from "@/data/products";
+import type { GooglePlaceReviews } from "@/lib/reviews/google";
 import { CallButton } from "@/components/ui/CallButton";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import { HeroRatingBlock, HeroReviewShowcase } from "@/components/hero/HeroReviews";
 
 const HEADLINE = ["From thread", "to identity."] as const;
 
@@ -23,10 +25,14 @@ const FACTS = [
 
 /**
  * The opening frame. A darkened macro field of finished work sits behind the
- * statement, one specimen is held out at full fidelity on the right, and the
- * whole composition resolves in a single sequence once the loader clears.
+ * statement, customers speak for the work on the right, and the whole
+ * composition resolves in a single sequence once the loader clears.
+ *
+ * `reviews` comes from the committed Google snapshot, read by the page. When
+ * it is missing the frame falls back to the specimen photograph, so the hero
+ * is complete either way.
  */
-export function Hero() {
+export function Hero({ reviews }: { reviews: GooglePlaceReviews | null }) {
   const root = useRef<HTMLElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
@@ -49,8 +55,8 @@ export function Hero() {
     if (reduced) {
       gsap.set([lines, bits], { yPercent: 0, opacity: 1 });
       gsap.set(rules, { scaleX: 1 });
-      gsap.set(frame, { clipPath: "inset(0% 0% 0% 0%)" });
-      gsap.set(photo, { scale: 1 });
+      if (frame.length) gsap.set(frame, { clipPath: "inset(0% 0% 0% 0%)" });
+      if (photo.length) gsap.set(photo, { scale: 1 });
       gsap.set(bgRef.current, { opacity: 0.34, scale: 1 });
       return;
     }
@@ -75,18 +81,26 @@ export function Hero() {
           0.24,
         )
         .fromTo(
-          frame,
-          { clipPath: "inset(0% 0% 100% 0%)" },
-          { clipPath: "inset(0% 0% 0% 0%)", duration: 1.6 },
-          0.42,
-        )
-        .fromTo(photo, { scale: 1.25 }, { scale: 1, duration: 2.2 }, 0.42)
-        .fromTo(
           bits,
           { opacity: 0, y: 18 },
           { opacity: 1, y: 0, duration: 1.1, stagger: STAGGER.base },
           0.72,
         );
+
+      // Both of these belong to the fallback specimen only — the review
+      // showcase reveals itself from state. GSAP warns on empty targets, so
+      // they are added conditionally rather than always.
+      if (frame.length) {
+        tl.fromTo(
+          frame,
+          { clipPath: "inset(0% 0% 100% 0%)" },
+          { clipPath: "inset(0% 0% 0% 0%)", duration: 1.6 },
+          0.42,
+        );
+      }
+      if (photo.length) {
+        tl.fromTo(photo, { scale: 1.25 }, { scale: 1, duration: 2.2 }, 0.42);
+      }
 
       // Slow counter-drift as the hero leaves; the type outruns the picture.
       gsap.to(q("[data-hero-parallax-slow]"), {
@@ -196,38 +210,63 @@ export function Hero() {
                 </span>
               </a>
             </div>
+
+            {reviews ? (
+              <div
+                data-hero-fade
+                className="mt-8 max-w-[30rem]"
+                style={{ opacity: 0 }}
+              >
+                <HeroRatingBlock data={reviews} />
+              </div>
+            ) : null}
           </div>
 
-          {/* ---- specimen ---- */}
-          <div className="lg:col-span-5 xl:col-span-6" data-hero-parallax-slow>
-            <div
-              data-hero-frame
-              // Landscape frame matched to the source's own orientation: a
-              // portrait crop of a 320x224 original would upscale ~2.3x.
-              className="relative ml-auto aspect-10/7 w-full max-w-[30rem] overflow-hidden border border-bone/10 bg-ink-800 shadow-(--shadow-lift)"
-              style={{ clipPath: "inset(0% 0% 100% 0%)" }}
-              data-cursor="view"
-            >
-              <div data-hero-photo className="absolute inset-0" style={{ willChange: "transform" }}>
-                <Image
-                  src={specimen.src}
-                  alt="A tray of finished embroidered patches, stitched edge to edge in full colour"
-                  fill
-                  priority
-                  quality={90}
-                  sizes="(min-width: 1024px) 30rem, 100vw"
-                  // just enough inset to trim the plate's white margin
-                  className="scale-[1.06] object-cover"
-                />
+          {/* ---- what customers say, or the specimen when we have none ---- */}
+          <div
+            // Left padding on wide screens is the room the thumbnail stack
+            // hangs into; without it the overhang would widen the page.
+            className="lg:col-span-5 lg:pl-10 xl:col-span-6"
+            data-hero-parallax-slow
+          >
+            {reviews ? (
+              <div className="ml-auto w-full max-w-[30rem]">
+                <HeroReviewShowcase data={reviews} />
               </div>
-              <span
-                aria-hidden="true"
-                className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-ink via-ink/70 to-transparent"
-              />
-              <span className="label-tech absolute bottom-4 left-4 text-bone/80">
-                Embroidery · Merrowed edge
-              </span>
-            </div>
+            ) : (
+              <div
+                data-hero-frame
+                // Landscape frame matched to the source's own orientation: a
+                // portrait crop of a 320x224 original would upscale ~2.3x.
+                className="relative ml-auto aspect-10/7 w-full max-w-[30rem] overflow-hidden border border-bone/10 bg-ink-800 shadow-(--shadow-lift)"
+                style={{ clipPath: "inset(0% 0% 100% 0%)" }}
+                data-cursor="view"
+              >
+                <div
+                  data-hero-photo
+                  className="absolute inset-0"
+                  style={{ willChange: "transform" }}
+                >
+                  <Image
+                    src={specimen.src}
+                    alt="A tray of finished embroidered patches, stitched edge to edge in full colour"
+                    fill
+                    priority
+                    quality={90}
+                    sizes="(min-width: 1024px) 30rem, 100vw"
+                    // just enough inset to trim the plate's white margin
+                    className="scale-[1.06] object-cover"
+                  />
+                </div>
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-ink via-ink/70 to-transparent"
+                />
+                <span className="label-tech absolute bottom-4 left-4 text-bone/80">
+                  Embroidery · Merrowed edge
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

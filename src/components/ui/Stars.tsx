@@ -26,11 +26,14 @@ export function Stars({
   count = 5,
   className,
   starClassName = "size-4",
+  emptyClassName = "text-ink/15",
 }: {
   rating: number;
   count?: number;
   className?: string;
   starClassName?: string;
+  /** Colour of the unfilled track. Needs overriding on dark surfaces. */
+  emptyClassName?: string;
 }) {
   const pct = Math.max(0, Math.min(1, rating / count)) * 100;
 
@@ -41,7 +44,7 @@ export function Stars({
       aria-label={`${rating.toFixed(1)} out of ${count} stars`}
     >
       {/* empty track */}
-      <span className="inline-flex gap-0.5 text-ink/15">
+      <span className={cn("inline-flex gap-0.5", emptyClassName)}>
         {Array.from({ length: count }, (_, i) => (
           <span key={i} className={starClassName}>
             <Star />

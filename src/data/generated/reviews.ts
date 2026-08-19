@@ -4,6 +4,7 @@ import type { GooglePlaceReviews } from "@/lib/reviews/google";
 
 export const GOOGLE_REVIEWS: GooglePlaceReviews | null = {
   "name": "Digitize Are Us",
+  "placeId": "ChIJwTjVIKdr04kRAt3Y1GKkGTA",
   "rating": 5,
   "total": 24,
   "mapsUrl": "https://maps.google.com/?cid=3465982132623039746&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA",
@@ -15,7 +16,30 @@ export const GOOGLE_REVIEWS: GooglePlaceReviews | null = {
       "photoUrl": "/images/reviews/reviewer-01.webp",
       "rating": 5,
       "relativeTime": "5 months ago",
-      "text": "Excellent service with these guys. They keep working till you’re satisfied.\nLucinda is great!"
+      "text": "Excellent service with these guys. They keep working till you’re satisfied.\nLucinda is great!",
+      "photos": [
+        {
+          "src": "/images/reviews/photos/photo-01.webp",
+          "width": 1254,
+          "height": 1254,
+          "credit": "business",
+          "author": "Digitize Are us"
+        },
+        {
+          "src": "/images/reviews/photos/photo-02.webp",
+          "width": 1400,
+          "height": 1400,
+          "credit": "business",
+          "author": "Digitize Are us"
+        },
+        {
+          "src": "/images/reviews/photos/photo-03.webp",
+          "width": 1400,
+          "height": 1400,
+          "credit": "business",
+          "author": "Digitize Are us"
+        }
+      ]
     },
     {
       "id": "places/ChIJwTjVIKdr04kRAt3Y1GKkGTA/reviews/ChZDSUhNMG9nS0VJQ0FnTUNZMXNHUlV3EAE",
@@ -24,7 +48,30 @@ export const GOOGLE_REVIEWS: GooglePlaceReviews | null = {
       "photoUrl": "/images/reviews/reviewer-02.webp",
       "rating": 5,
       "relativeTime": "a year ago",
-      "text": "The quality of the digitization is fantastic! The turn around and communication was very quick. I will definitely do business with them again."
+      "text": "The quality of the digitization is fantastic! The turn around and communication was very quick. I will definitely do business with them again.",
+      "photos": [
+        {
+          "src": "/images/reviews/photos/photo-04.webp",
+          "width": 851,
+          "height": 846,
+          "credit": "business",
+          "author": "Digitize Are us"
+        },
+        {
+          "src": "/images/reviews/photos/photo-05.webp",
+          "width": 1400,
+          "height": 1400,
+          "credit": "business",
+          "author": "Digitize Are us"
+        },
+        {
+          "src": "/images/reviews/photos/photo-06.webp",
+          "width": 847,
+          "height": 846,
+          "credit": "business",
+          "author": "Digitize Are us"
+        }
+      ]
     },
     {
       "id": "places/ChIJwTjVIKdr04kRAt3Y1GKkGTA/reviews/ChZDSUhNMG9nS0VJQ0FnSUQ3a3V5M1Z3EAE",
@@ -33,7 +80,30 @@ export const GOOGLE_REVIEWS: GooglePlaceReviews | null = {
       "photoUrl": "/images/reviews/reviewer-03.webp",
       "rating": 5,
       "relativeTime": "a year ago",
-      "text": "Always does great work and very quick turn around!"
+      "text": "Always does great work and very quick turn around!",
+      "photos": [
+        {
+          "src": "/images/reviews/photos/photo-07.webp",
+          "width": 1050,
+          "height": 1400,
+          "credit": "customer",
+          "author": "Mallory Wortman"
+        },
+        {
+          "src": "/images/reviews/photos/photo-08.webp",
+          "width": 1050,
+          "height": 1400,
+          "credit": "customer",
+          "author": "Mallory Wortman"
+        },
+        {
+          "src": "/images/reviews/photos/photo-01.webp",
+          "width": 1254,
+          "height": 1254,
+          "credit": "business",
+          "author": "Digitize Are us"
+        }
+      ]
     },
     {
       "id": "places/ChIJwTjVIKdr04kRAt3Y1GKkGTA/reviews/Ci9DQUlRQUNvZENodHljRjlvT20xbVVVbHRkR2hhTFZSNFkzRmZjRk5xYURKemJWRRAB",
@@ -42,7 +112,30 @@ export const GOOGLE_REVIEWS: GooglePlaceReviews | null = {
       "photoUrl": "/images/reviews/reviewer-04.webp",
       "rating": 5,
       "relativeTime": "3 months ago",
-      "text": "Great customer service, quick turnaround!"
+      "text": "Great customer service, quick turnaround!",
+      "photos": [
+        {
+          "src": "/images/reviews/photos/photo-02.webp",
+          "width": 1400,
+          "height": 1400,
+          "credit": "business",
+          "author": "Digitize Are us"
+        },
+        {
+          "src": "/images/reviews/photos/photo-03.webp",
+          "width": 1400,
+          "height": 1400,
+          "credit": "business",
+          "author": "Digitize Are us"
+        },
+        {
+          "src": "/images/reviews/photos/photo-04.webp",
+          "width": 851,
+          "height": 846,
+          "credit": "business",
+          "author": "Digitize Are us"
+        }
+      ]
     },
     {
       "id": "places/ChIJwTjVIKdr04kRAt3Y1GKkGTA/reviews/ChdDSUhNMG9nS0VJQ0FnSUNuM0t1M3N3RRAB",
@@ -51,7 +144,30 @@ export const GOOGLE_REVIEWS: GooglePlaceReviews | null = {
       "photoUrl": "/images/reviews/reviewer-05.webp",
       "rating": 5,
       "relativeTime": "a year ago",
-      "text": "The best service I have received in years. Responses were quick and the team was very professional. I have found the company that I will be using to digitize all my logos🙏🏽"
+      "text": "The best service I have received in years. Responses were quick and the team was very professional. I have found the company that I will be using to digitize all my logos🙏🏽",
+      "photos": [
+        {
+          "src": "/images/reviews/photos/photo-05.webp",
+          "width": 1400,
+          "height": 1400,
+          "credit": "business",
+          "author": "Digitize Are us"
+        },
+        {
+          "src": "/images/reviews/photos/photo-06.webp",
+          "width": 847,
+          "height": 846,
+          "credit": "business",
+          "author": "Digitize Are us"
+        },
+        {
+          "src": "/images/reviews/photos/photo-01.webp",
+          "width": 1254,
+          "height": 1254,
+          "credit": "business",
+          "author": "Digitize Are us"
+        }
+      ]
     }
   ]
 };

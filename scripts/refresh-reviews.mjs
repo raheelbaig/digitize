@@ -11,16 +11,40 @@
  * Google's Places policy expects cached content to be refreshed rather than
  * kept indefinitely, so run this occasionally. Monthly is ample, and twelve
  * calls a year sits far inside the free allowance.
+ *
+ * Photos are pulled too. The listing's photos carry an author attribution, so
+ * the ones a reviewer uploaded can be handed to that reviewer's own card; the
+ * rest are the business's own uploads and are captioned as such. See
+ * `contributorId` for why the join is on the numeric id rather than the URI.
  */
 import sharp from "sharp";
 import { mkdir, writeFile, rm } from "node:fs/promises";
 import path from "node:path";
 
-const ENDPOINT = "https://places.googleapis.com/v1/places";
-const FIELDS = "displayName,rating,userRatingCount,googleMapsUri,reviews";
+const API = "https://places.googleapis.com/v1";
+const ENDPOINT = `${API}/places`;
+const FIELDS = "displayName,rating,userRatingCount,googleMapsUri,reviews,photos";
 const ROOT = path.resolve(import.meta.dirname, "..");
 const AVATARS = path.join(ROOT, "public", "images", "reviews");
+const PHOTOS = path.join(AVATARS, "photos");
 const OUT = path.join(ROOT, "src", "data", "generated", "reviews.ts");
+
+/** Widest we will ever display one. Bigger costs bytes for no visible gain. */
+const PHOTO_W = 1400;
+/** One main image plus a two-deep thumbnail stack. */
+const PHOTOS_PER_REVIEW = 3;
+
+/**
+ * The stable half of a contributor URI.
+ *
+ * Google writes the same person two different ways depending on where they
+ * turn up — `www.google.com/maps/contrib/<id>/reviews` on a review, and
+ * `maps.google.com/maps/contrib/<id>` on a photo — so matching whole URIs
+ * silently finds nothing. The numeric id is what actually identifies them.
+ */
+function contributorId(uri) {
+  return uri?.match(/\/maps\/contrib\/(\d+)/)?.[1] ?? null;
+}
 
 try {
   process.loadEnvFile(".env.local");
@@ -93,9 +117,74 @@ if (key && placeId) {
     );
     console.log("");
 
-    // --- avatars, stored locally so the page needs nothing from Google ---
+    // --- avatars and photos, stored locally so the page needs nothing
+    //     from Google at view time ---
     await rm(AVATARS, { recursive: true, force: true });
     await mkdir(AVATARS, { recursive: true });
+    await mkdir(PHOTOS, { recursive: true });
+
+    /** Every listing photo, bucketed by the contributor who uploaded it. */
+    const byContributor = new Map();
+    for (const photo of data.photos ?? []) {
+      const attribution = photo.authorAttributions?.[0];
+      const id = contributorId(attribution?.uri);
+      if (!id) continue;
+      if (!byContributor.has(id)) byContributor.set(id, []);
+      byContributor.get(id).push({ photo, author: attribution?.displayName ?? "" });
+    }
+
+    // The business uploads under its own contributor account, which the API
+    // does not flag — it is recognisable only by the name matching the place.
+    const placeName = (data.displayName?.text ?? "").trim().toLowerCase();
+    const ours = [];
+    for (const entries of byContributor.values()) {
+      if (entries[0].author.trim().toLowerCase() === placeName) ours.push(...entries);
+    }
+
+    let saved = 0;
+    /** photo.name -> saved record, so no photo is ever fetched (or paid for) twice. */
+    const downloaded = new Map();
+
+    /** Downloads one photo at display size. Each miss is a billed request. */
+    async function savePhoto({ photo, author }, credit) {
+      const hit = downloaded.get(photo.name);
+      if (hit) return hit;
+
+      try {
+        const res = await fetch(`${API}/${photo.name}/media?maxWidthPx=${PHOTO_W}`, {
+          headers: { "X-Goog-Api-Key": key },
+        });
+        if (!res.ok) return null;
+
+        saved += 1;
+        const file = `photo-${String(saved).padStart(2, "0")}.webp`;
+        const info = await sharp(Buffer.from(await res.arrayBuffer()))
+          // Cap the long edge, not just the width: reviewers shoot portrait,
+          // and a width-only cap leaves a 3024x4032 phone photo taller than it
+          // is wide and several times the weight of everything around it.
+          .resize({ width: PHOTO_W, height: PHOTO_W, fit: "inside", withoutEnlargement: true })
+          .webp({ quality: 80 })
+          .toFile(path.join(PHOTOS, file));
+
+        const record = {
+          src: `/images/reviews/photos/${file}`,
+          width: info.width,
+          height: info.height,
+          credit,
+          author,
+        };
+        downloaded.set(photo.name, record);
+        return record;
+      } catch {
+        return null; // a card without photos still renders
+      }
+    }
+
+    // Business photos are dealt round-robin with wraparound. Dealing them
+    // strictly in order would hand the whole pool to the first review and leave
+    // the last ones bare; only one card is on screen at a time, so a picture
+    // reappearing on a later card costs nothing.
+    let nextOurs = 0;
 
     const reviews = [];
     let n = 0;
@@ -124,6 +213,22 @@ if (key && placeId) {
         }
       }
 
+      // This reviewer's own uploads first; the business's own work fills the
+      // rest. Photos by customers whose review Google did not return are left
+      // out on purpose — showing one beside somebody else's quote would read
+      // as that person's photo.
+      const mine = byContributor.get(contributorId(r.authorAttribution?.uri)) ?? [];
+      const photos = [];
+
+      for (const entry of mine.slice(0, PHOTOS_PER_REVIEW)) {
+        const record = await savePhoto(entry, "customer");
+        if (record) photos.push(record);
+      }
+      for (let i = 0; photos.length < PHOTOS_PER_REVIEW && i < ours.length; i += 1) {
+        const record = await savePhoto(ours[nextOurs++ % ours.length], "business");
+        if (record) photos.push(record);
+      }
+
       reviews.push({
         id: r.name ?? `review-${n}`,
         author: r.authorAttribution?.displayName?.trim() || "A Google user",
@@ -132,17 +237,23 @@ if (key && placeId) {
         rating: typeof r.rating === "number" ? r.rating : 0,
         relativeTime: r.relativePublishTimeDescription ?? "",
         text, // verbatim, as Google's terms require
+        photos,
       });
 
       const stars = "*".repeat(r.rating ?? 0).padEnd(5);
       const preview = text.replace(/\s+/g, " ").slice(0, 60);
-      console.log(`  ${stars} ${reviews.at(-1).author} — ${preview}…`);
+      const own = photos.filter((x) => x.credit === "customer").length;
+      console.log(
+        `  ${stars} ${reviews.at(-1).author} — ${preview}…` +
+          `  [${photos.length} photos, ${own} theirs]`,
+      );
     }
 
     const snapshot =
       typeof data.rating === "number" && data.userRatingCount
         ? {
             name: data.displayName?.text ?? "",
+            placeId,
             rating: data.rating,
             total: data.userRatingCount,
             mapsUrl: data.googleMapsUri ?? "",
@@ -163,6 +274,7 @@ if (key && placeId) {
     await writeFile(OUT, header);
 
     console.log("");
+    console.log(`photos   : ${saved} downloaded to ${path.relative(ROOT, PHOTOS)}`);
     console.log(`wrote ${path.relative(ROOT, OUT)}`);
     console.log(
       snapshot

@@ -6,19 +6,24 @@ import { ProcessStory } from "@/components/story/ProcessStory";
 import { MacroDetail } from "@/components/experience/MacroDetail";
 import { Benefits } from "@/components/experience/Benefits";
 import { B2BPositioning } from "@/components/experience/B2BPositioning";
-import { Reviews } from "@/components/experience/Reviews";
 import { FinalCTA } from "@/components/experience/FinalCTA";
 import { StitchDivider } from "@/components/ui/StitchDivider";
+import { getGoogleReviews } from "@/lib/reviews/google";
 
 /**
  * One continuous scroll: opening → thesis → craft → catalogue → process →
  * detail → terms → audience → call. Section order is the narrative, so the
  * dividers carry the seam between scenes rather than hard edges.
+ *
+ * Reviews are read here, on the server, and handed to the hero — the snapshot
+ * never becomes a client-side fetch, and the page stays static.
  */
-export default function Home() {
+export default async function Home() {
+  const reviews = await getGoogleReviews();
+
   return (
     <>
-      <Hero />
+      <Hero reviews={reviews} />
       <BrandStatement />
       <CraftSection />
       <StitchDivider label="The archive" />
@@ -27,7 +32,6 @@ export default function Home() {
       <MacroDetail />
       <Benefits />
       <B2BPositioning />
-      <Reviews />
       <FinalCTA />
     </>
   );

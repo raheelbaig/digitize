@@ -17,6 +17,21 @@
 
 import { GOOGLE_REVIEWS } from "@/data/generated/reviews";
 
+/**
+ * A photo from the listing, shown beside the review it belongs to.
+ *
+ * `credit` matters and must not be flattened away: "customer" means this
+ * reviewer uploaded it themselves, "business" means it is our own work filling
+ * out a card whose author posted no pictures. The caption says which.
+ */
+export type ReviewPhoto = {
+  readonly src: string;
+  readonly width: number;
+  readonly height: number;
+  readonly credit: "customer" | "business";
+  readonly author: string;
+};
+
 /** Google returns at most five. */
 export type GoogleReview = {
   readonly id: string;
@@ -26,10 +41,13 @@ export type GoogleReview = {
   readonly rating: number;
   readonly relativeTime: string;
   readonly text: string;
+  readonly photos: readonly ReviewPhoto[];
 };
 
 export type GooglePlaceReviews = {
   readonly name: string;
+  /** Needed to build the write-a-review link. Absent in pre-2026 snapshots. */
+  readonly placeId?: string | null;
   readonly rating: number;
   readonly total: number;
   readonly mapsUrl: string;
@@ -52,10 +70,12 @@ function mockReviews(): GooglePlaceReviews {
     rating,
     relativeTime: when,
     text,
+    photos: [],
   });
 
   return {
     name: "Sample Place",
+    placeId: null,
     rating: 4.8,
     total: 24,
     mapsUrl: "https://maps.google.com/",
